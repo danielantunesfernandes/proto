@@ -4,7 +4,7 @@ SELECT u.id id,
     tabRelByUser.relId relId,
     tabRelByUser.idRel as idRel,
     usersRelations.name nameRelUser,
-    catRelations.name,
+    catRelations.name relType,
     bLoc.id birthLocId,
     bLoc.idDistrict birthLocDistrictId,
     bLoc.idMunicipality birthLocMunicipalityId,
@@ -24,7 +24,7 @@ from users u,(
 where u.id = tabRelByUser.id
     and usersRelations.id= tabRelByUser.idRel
     and tabRelByUser.cat= catRelations.id
-    and bloc.id = u.id
+     and bLoc.id = u.birthdayLocationId
 UNION
 SELECT u.id id,u.name name, NULL,NULL, NULL, NULL,   
     bLoc.id birthLocId,
@@ -34,7 +34,7 @@ SELECT u.id id,u.name name, NULL,NULL, NULL, NULL,
     bLoc.idVillage birthLocVillageId
 FROM users u, relations r, user_birthday_location bLoc
 WHERE (u.id != r.idRelA and u.id != r.idRelB)
-    and bloc.id = u.id
+    and bLoc.id = u.birthdayLocationId
     `;
 
 export const GET_USERS = 'SELECT * FROM users';
