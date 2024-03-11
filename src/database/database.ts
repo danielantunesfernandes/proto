@@ -4,6 +4,7 @@ import { RelationOffspring, User } from '../interfaces';
 import { mapRowsToUsers } from '../mappers/user';
 import { GET_USERS, GET_USERS_FULL_INFO } from './queries/user';
 import { getRelationsOffspringByRelationId } from './relations';
+import { mapOffspringRelationsToUsers } from '../mappers/relations';
 
 // Create SQLite database instance
 const db = new sqlite3.Database('./database/proto.db');
@@ -42,14 +43,7 @@ export const getUsers = (fullInfo?: boolean): Promise<User[]> => {
                 if (idRelations.length > 0) {
                     let uniqueRelationIdsArray = [...new Set(idRelations)];//clear duplicates
                     const offspringRelations: Map<number, RelationOffspring[]> = await getRelationsOffspringByRelationId(uniqueRelationIdsArray);
-                    offspringRelations.forEach((offspringRelation, key) => {
-                        users.forEach((user) => {
-                            if (user.relation && user.relation.id === key) {
-                                user.relation.relationsOffspring = user.relation.relationsOffspring || [];
-                                user.relation.relationsOffspring.push(...offspringRelation);
-                            }
-                        });
-                    });
+                    mapOffspringRelationsToUsers(offspringRelations, users);
                 }
                 resolve(users);
             }
