@@ -1,5 +1,6 @@
 import express from 'express';
 import apiRoutes from './routes/api-routes';
+import routerScrap from './routes/scrap-api-routes';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -9,6 +10,7 @@ app.get('/', (req, res) => {
 });
 
 app.use('/api', apiRoutes);
+app.use('/scrap', routerScrap);
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
