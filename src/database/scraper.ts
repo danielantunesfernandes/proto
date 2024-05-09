@@ -109,11 +109,16 @@ const insertPositionHistory = async (item: Item, id: number): Promise<void> => {
         });
     });
 }
-export const addScrapResult = (result: ScrapResult[]): Promise<void> => {
+
+export type AddScrapResult = {
+    countNewsAdd: number;
+}
+
+export const addScrapResult = (result: ScrapResult[]): Promise<AddScrapResult> => {
+    const addScrapResult: AddScrapResult = { countNewsAdd: 0 };
     return new Promise((resolve, reject) => {
         result.forEach(async (resultItem: ScrapResult) => {
             const sourceId = await getSourceId(resultItem.source);
-            console.log(sourceId);
             resultItem.items.forEach(async (section) => {
                 const sectionId = await getSectionId(section.title);
                 section.items.forEach(async (item) => {
@@ -122,7 +127,7 @@ export const addScrapResult = (result: ScrapResult[]): Promise<void> => {
                             reject(err);
                         } else {
                             if (this.changes > 0) {
-                                console.log("news inserted");
+                                addScrapResult.countNewsAdd++;
                                 await insertPositionHistory(item, this.lastID);
                             } else {
                                 const lastPositionReg: GetLastPositionByNewResponse | undefined = await getLastPositionByNew(item);
@@ -130,7 +135,7 @@ export const addScrapResult = (result: ScrapResult[]): Promise<void> => {
                                     await insertPositionHistory(item, lastPositionReg.newsId);
                                 }
                             }
-                            resolve();
+                            resolve(addScrapResult);
                         }
                     });
                 });

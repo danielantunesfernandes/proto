@@ -1,7 +1,7 @@
 import axios, { AxiosError, AxiosResponse } from 'axios';
 import { Request, Response } from 'express';
 import { JSDOM } from 'jsdom';
-import { addScrapResult } from '../database/scraper';
+import { AddScrapResult, addScrapResult } from '../database/scraper';
 
 export type Item = {
     title: string;
@@ -41,8 +41,8 @@ export class ScrapController {
         );
         return writingLinks.map((link, index) => {
             return {
-                title: link.text.replace(/\n/g, ''),
-                url: link.href,
+                title: link.text.trim(),
+                url: 'https://www.publico.pt' + link.href,
                 position: index,
             };
         });
@@ -57,11 +57,12 @@ export class ScrapController {
                 sections[sectionIndex].items.push(item);
             } else if (item.url.indexOf('/seccao/') > 0) {
                 sections.push({
-                    title: item.title,
+                    title: item.title.trim(),
                     url: item.url, items: []
                 });
             } else {
                 if (item.title.trim() !== '') {
+                    item.title = item.title.trim();
                     sections[sections.length - 1].items.push(item);
                 }
 
@@ -104,13 +105,12 @@ export class ScrapController {
             const itemsPublico: Item[] = this.extractDataPublico(domPublico.window.document);
             const sectionsPublico: Section[] = this.handleDataPublico(itemsPublico);
 
-            const result: ScrapResult[] = [{ source: urls[0], items: sections }, { source: urls[1], items: sectionsPublico }];
-            await addScrapResult(result);
+            const input: ScrapResult[] = [{ source: urls[0], items: sections }, { source: urls[1], items: sectionsPublico }];
+            const result: AddScrapResult = await addScrapResult(input);
             res.json(result);
         } catch (error) {
             console.error(error);
             res.status(500).json({ error: 'Internal server error' });
         }
     }
-
 }
